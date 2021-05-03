@@ -36,7 +36,7 @@ class DoctrineOrmProvider implements ServiceProviderInterface
             $doctrineConfig->setMetadataCacheImpl(new FilesystemCache($config->get('base_dir') . '/var/cache/doctrine'));
 
             $connectionConfig = array_merge($config->get('doctrine')['connection'], [
-                'url' => getenv('DATABASE'),
+                'url' => $config->get('doctrine')['connection']['url'],
             ]);
 
             return EntityManager::create($connectionConfig, $doctrineConfig);

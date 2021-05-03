@@ -1,25 +1,57 @@
 version: '3.7'
 
 services:
+  test-proxy:
+    image: nginx:alpine
+    container_name: test-proxy
+    depends_on:
+      - app
+    ports:
+      - 8080:80
+    links:
+      - app
+    volumes:
+      - ./:/var/www/app
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/sites:/etc/nginx/conf.d
+    working_dir: /var/www
+    networks:
+      test:
+        aliases:
+          - test-local.ru
+
   app:
     build:
-      dockerfile: docker/php-dev.Dockerfile
+      dockerfile: docker/php/php-dev.Dockerfile
       context: .
     volumes:
       - .:/var/www/app
+    working_dir: /var/www/app
+    user: 1000:1000
     environment:
       COMPOSER_MEMORY_LIMIT: -1
       COMPOSER_ALLOW_SUPERUSER: 1
       APP_ENV: 'dev'
-    ports:
-      - 8080:8080
+      PHP_IDE_CONFIG: "serverName=docker"
+    extra_hosts:
+      host.docker.internal: host-gateway
+    networks:
+      test:
 
   database:
     image: mysql:5.7
+    container_name: database
     ports:
-      - 3306:3306
+      - 3326:3306
     environment:
       MYSQL_ROOT_PASSWORD: mysql
       MYSQL_DATABASE: slim_project
       MYSQL_USER: webmaster
       MYSQL_PASSWORD: webmaster
+    volumes:
+      - ./docker/db:/docker-entrypoint-initdb.d
+    networks:
+      test:
+
+networks:
+  test:

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Movie;
+use Exception;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -62,7 +63,7 @@ class HomeController
             $data = $this->twig->render('home/index.html.twig', [
                 'trailers' => $this->fetchData(),
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new HttpBadRequestException($request, $e->getMessage(), $e);
         }
 
@@ -76,8 +77,13 @@ class HomeController
      */
     protected function fetchData(): Collection
     {
+      try {
         $data = $this->em->getRepository(Movie::class)
-            ->findAll();
+          ->findAll();
+
+      } catch (Exception $e) {
+        $data = [];
+      }
 
         return new ArrayCollection($data);
     }

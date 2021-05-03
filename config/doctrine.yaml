@@ -1,6 +1,5 @@
 connection:
-  driver: 'pdo_mysql'
-  charset: 'utf8mb4'
+  url: mysql://webmaster:webmaster@database:3306/slim_project?charset=utf8mb4
 
 mapping:
   - Entity

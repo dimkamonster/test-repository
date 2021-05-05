@@ -9,6 +9,7 @@ namespace App\Command;
 
 use App\Entity\Movie;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
@@ -105,7 +106,7 @@ class FetchDataCommand extends Command
             throw new RuntimeException(sprintf('Response status is %d, expected %d', $status, 200));
         }
         $data = $response->getBody()->getContents();
-        $this->processXml($data);
+        $this->processDOM($data);
 
         $this->logger->info(sprintf('End %s at %s', __CLASS__, (string) date_create()->format(DATE_ATOM)));
 
@@ -115,7 +116,7 @@ class FetchDataCommand extends Command
     /**
      * @param string $data
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function processXml(string $data): void
     {
@@ -140,12 +141,58 @@ class FetchDataCommand extends Command
         $this->doctrine->flush();
     }
 
+  /**
+   * @param string $data
+   *
+   * @throws Exception
+   */
+  protected function processDOM(string $data): void
+  {
+    $rss = new \DOMDocument();
+    $rss->loadXML($data);
+    if (!$rss->getElementsByTagName('item')->length) {
+      throw new RuntimeException('Could not find \'item\' element in feed');
+    }
+
+    $i = 0;
+    foreach ($rss->getElementsByTagName('item') as $item) {
+      if (++$i >10) {
+        break;
+      }
+      $trailer = $this->getMovie((string) $item->getElementsByTagName('title')->item(0)->nodeValue)
+        ->setTitle((string) $item->getElementsByTagName('title')->item(0)->nodeValue)
+        ->setDescription((string) $item->getElementsByTagName('description')->item(0)->nodeValue)
+        ->setLink((string) $item->getElementsByTagName('link')->item(0)->nodeValue)
+        ->setPubDate($this->parseDate((string) $item->getElementsByTagName('pubDate')->item(0)->nodeValue))
+        ->setImage((string) $this->getImageSrc($item->getElementsByTagName('encoded')->item(0)->nodeValue))
+      ;
+
+      $this->doctrine->persist($trailer);
+    }
+
+    $this->doctrine->flush();
+  }
+
+  /**
+   * @param string $html
+   *
+   * @return string
+   */
+  protected function getImageSrc($html): string
+  {
+    $content = new \DOMDocument();
+    $content->loadHTML($html);
+    $xpath = new \DOMXPath($content);
+    return (string) $xpath->evaluate("string(//img/@src)");
+  }
+
+
     /**
      * @param string $date
      *
      * @return \DateTime
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function parseDate(string $date): \DateTime
     {

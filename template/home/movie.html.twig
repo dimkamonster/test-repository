@@ -1,0 +1,22 @@
+{% extends 'main.html.twig' %}
+
+{% block title %}{{ movie.title }} {% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-5 mb-4">{{ movie.title }}</h1>
+        <table class="table table-bordered">
+            <tr>
+                <td>
+                    {{ movie.description }}
+                    <a href="{{ movie.link }}" target="_blank">Source</a>
+                </td>
+                <td><img src="{{ movie.image }}"/></td>
+            </tr>
+            <tr style="border: none">
+                <td><a href="javascript: history.go(-1)">Go Back</a></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}

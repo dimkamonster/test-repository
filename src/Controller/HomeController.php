@@ -89,7 +89,7 @@ class HomeController
     {
       try {
         $data = $this->em->getRepository(Movie::class)
-          ->findAll();
+          ->findBy([], ['pubDate'=>'DESC'], 10, 0);
 
       } catch (Exception $e) {
         $data = [];

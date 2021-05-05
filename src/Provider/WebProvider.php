@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace App\Provider;
 
-use App\Controller\HomeController;
+use App\Controller\{HomeController,TrailerController};
 use App\Support\Config;
 use App\Support\ServiceProviderInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,6 +41,9 @@ class WebProvider implements ServiceProviderInterface
     {
         $container->set(HomeController::class, static function (ContainerInterface $container) {
             return new HomeController($container->get(RouteCollectorInterface::class), $container->get(Environment::class), $container->get(EntityManagerInterface::class));
+        });
+        $container->set(TrailerController::class, static function (ContainerInterface $container) {
+            return new TrailerController($container->get(RouteCollectorInterface::class), $container->get(Environment::class), $container->get(EntityManagerInterface::class));
         });
     }
 

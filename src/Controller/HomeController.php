@@ -6,6 +6,8 @@ namespace App\Controller;
 
 use App\Entity\Movie;
 use Exception;
+use ReflectionClass;
+use ReflectionException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -60,8 +62,16 @@ class HomeController
     public function index(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         try {
+          $reflection = new ReflectionClass($this);
+          $className = $reflection->getShortName();
+        } catch (ReflectionException $e) {
+          $className = "empty";
+        }
+        try {
             $data = $this->twig->render('home/index.html.twig', [
-                'trailers' => $this->fetchData(),
+              'trailers' => $this->fetchData(),
+              'className' => $className,
+              'methodName' => __FUNCTION__,
             ]);
         } catch (Exception $e) {
             throw new HttpBadRequestException($request, $e->getMessage(), $e);

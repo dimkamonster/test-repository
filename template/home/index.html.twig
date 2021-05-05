@@ -4,6 +4,12 @@
 
 {% block content %}
     <div class="container">
+        <h3 id="clock"></h3>
+        <div>
+            <span id="controllerClassName">ClassName is {{ className }}</span>
+            <div class="spacer"></div>
+            <span id="controllerClassMethod">Called method is {{ methodName }}</span>
+        </div>
         <h1 class="mt-5 mb-4">{{ trailers | length }} iTunes Movie trailers</h1>
         <table class="table table-bordered">
             {% for trailer in trailers %}
@@ -13,4 +19,11 @@
             {% endfor %}
         </table>
     </div>
+    <script>
+        function updateClock() {
+            document.getElementById('clock').innerHTML = new Date().toLocaleString();
+        }
+        updateClock();
+        setInterval(updateClock,1000);
+    </script>
 {% endblock %}

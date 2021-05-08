@@ -1,3 +1,20 @@
+1. Для запуска приложения нужно клонировать репозиторий по ссылке
+    - https://github.com/dimkamonster/test-repository.git
+
+1. Перейти в папку проекта (test-repository)
+
+1. Установить зависимости из файла composer.json
+    - composer install
+
+1. Создать файл в корне проекта .env
+    - touch .env
+
+1. Запустить контейнеры с проектом
+    - docker-compose up -d --build
+
+1. Для импорта 10 последних записей из [iTunes Movie Trailers](https://trailers.apple.com) используйте команду
+    - docker exec -it test-repository_app_1 bin/console "fetch:trailers"
+
 Тестовое задание для PHP-программиста
 =====================================
 
